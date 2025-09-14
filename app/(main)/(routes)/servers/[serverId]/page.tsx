@@ -4,10 +4,11 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 interface ServerPageParams {
-  params: { serverId: string };
+  params: Promise<{ serverId: string }>
 }
 
 const ServerPage = async ({ params }: ServerPageParams) => {
+  const { serverId } = await params;
   const { redirectToSignIn } = await auth();
   const profile = await currentProfile();
 
@@ -15,7 +16,7 @@ const ServerPage = async ({ params }: ServerPageParams) => {
 
   const server = await db.server.findUnique({
     where: {
-      id: params.serverId,
+      id: serverId,
       members: {
         some: {
           profileId: profile.id,
@@ -39,7 +40,7 @@ const ServerPage = async ({ params }: ServerPageParams) => {
   if (initialChannel?.name !== "general") {
     return null;
   }
-  return redirect(`/servers/${params.serverId}/channels/${initialChannel?.id}`);
+  return redirect(`/servers/${serverId}/channels/${initialChannel?.id}`);
 };
 
 export default ServerPage;

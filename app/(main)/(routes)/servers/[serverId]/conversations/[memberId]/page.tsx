@@ -6,13 +6,14 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 interface MemberPageProps {
-  params: {
+  params: Promise<{
     memberId: string;
     serverId: string;
-  };
+  }>;
 }
 
 const MemberPage = async ({ params }: MemberPageProps) => {
+  const { memberId, serverId } = await params;
   const { redirectToSignIn } = await auth();
 
   const profile = await currentProfile();
@@ -23,7 +24,7 @@ const MemberPage = async ({ params }: MemberPageProps) => {
 
   const currentMember = await db.member.findFirst({
     where: {
-      serverId: params.serverId,
+      serverId: serverId,
       profileId: profile.id,
     },
     include: {
@@ -37,11 +38,11 @@ const MemberPage = async ({ params }: MemberPageProps) => {
 
   const conversation = await getOrCreateConversation(
     currentMember.id,
-    params.memberId
+    memberId
   );
 
   if (!conversation) {
-    return redirect(`/servers/${params.serverId}`);
+    return redirect(`/servers/${serverId}`);
   }
 
   const { memberOne, memberTwo } = conversation;
@@ -51,7 +52,7 @@ const MemberPage = async ({ params }: MemberPageProps) => {
     <div className="bg-white dark:bg-[#313338] flex flex-col h-full">
       <ChatHeader
         imageUrl={otherMember.profile.imageUrl}
-        serverId={params.serverId}
+        serverId={serverId}
         name={otherMember.profile.name}
         type="conversation"
       />

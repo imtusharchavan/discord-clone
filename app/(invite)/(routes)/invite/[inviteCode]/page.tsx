@@ -4,7 +4,8 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from "next/navigation";
 const InviteCodePage = async ({
   params,
-}: { params: { inviteCode: string } }) => {
+}: { params: Promise<{ inviteCode: string }> }) => {
+  const {inviteCode} = await params;
   const { redirectToSignIn } = await auth()
   const profile = await currentProfile();
 
@@ -12,13 +13,13 @@ const InviteCodePage = async ({
     return redirectToSignIn();
   }
 
-  if (!params.inviteCode) {
+  if (!inviteCode) {
     return redirect("/");
   }
 
   const existingServer = await db.server.findFirst({
     where: {
-      inviteCode: params.inviteCode,
+      inviteCode: inviteCode,
       members: {
         some: {
           profileId: profile.id,
@@ -33,7 +34,7 @@ const InviteCodePage = async ({
 
   const server = await db.server.update({
     where: {
-      inviteCode: params.inviteCode,
+      inviteCode: inviteCode,
     },
     data: {
       members: {

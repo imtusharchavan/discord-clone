@@ -6,13 +6,14 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 interface ChannelPageProps {
-  params: {
+  params: Promise<{
     serverId: string;
     channelId: string;
-  };
+  }>;
 }
 
 const ChannelPage = async ({ params }: ChannelPageProps) => {
+  const { serverId, channelId } = await params;
   const { redirectToSignIn } = await auth();
   const profile = await currentProfile();
 
@@ -22,13 +23,13 @@ const ChannelPage = async ({ params }: ChannelPageProps) => {
 
   const channel = await db.channel.findUnique({
     where: {
-      id: params.channelId,
+      id: channelId,
     },
   });
 
   const member = await db.member.findFirst({
     where: {
-      serverId: params.serverId,
+      serverId: serverId,
       profileId: profile.id,
     },
   });
