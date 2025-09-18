@@ -12,8 +12,9 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "./generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "./generated/prisma"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 model Profile {
@@ -65,7 +66,7 @@ model Member {
   serverId String
   server   Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
-  messages Message[]
+  messages       Message[]
   directMessages DirectMessage[]
 
   conversationsInitiated Conversation[] @relation("MemberOne")
@@ -144,8 +145,8 @@ model Conversation {
 
 model DirectMessage {
   id String @id @default(uuid())
-  
-  content String @db.Text
+
+  content String  @db.Text
   fileUrl String? @db.Text
 
   memberId String
